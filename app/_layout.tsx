@@ -50,12 +50,23 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    // <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack>
         <Stack.Screen
           name="(main)"
           options={{ title: "Home", headerShown: false }}
         />
+        <Stack.Screen name="search" options={{ title: "" }} />
+        <Stack.Screen name="cart" options={{ title: "Cart" }} />
+        <Stack.Screen name="category/[category]" options={{ title: "" }} />
+        <Stack.Screen name="product/[productId]" options={{ title: "" }} />
+        <Stack.Screen name="products/[query]" options={{ title: "" }} />
+        <Stack.Screen name="edit-details" options={{ title: "Edit Details" }} />
+        <Stack.Screen name="orders" options={{ title: "My Orders" }} />
+        <Stack.Screen name="favourites" options={{ title: "My Favourites" }} />
+        <Stack.Screen name="auth/login" options={{ title: "Login" }} />
+        <Stack.Screen name="auth/register" options={{ title: "Register" }} />
       </Stack>
     </ThemeProvider>
   );

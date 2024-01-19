@@ -1,19 +1,9 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+export enum Colors {
+  ORANGE = "#f48544",
+  WHITE = "#ffffff",
+  DARK_GRAY = "#333333",
+  LIGHT_GRAY = "#CCCCCC",
+}
 
-export default {
-  light: {
-    text: '#000',
-    background: '#fff',
-    tint: tintColorLight,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#fff',
-    background: '#000',
-    tint: tintColorDark,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorDark,
-  },
-};
+// GREEN = "#1a6734",
+export const shades = ["#9DBC98", "#638889", "#E6BAA3", "#FF9843", "#7FC7D9"];

@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "dev": "expo start --web",
     "test": "jest --watchAll"
   },
   "jest": {
@@ -14,9 +15,12 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@react-native-async-storage/async-storage": "1.18.2",
     "@react-navigation/native": "^6.0.2",
+    "axios": "^1.6.5",
     "expo": "~49.0.18",
     "expo-font": "~11.4.0",
+    "expo-linear-gradient": "~12.3.0",
     "expo-linking": "~5.0.2",
     "expo-router": "^2.0.0",
     "expo-splash-screen": "~0.20.5",

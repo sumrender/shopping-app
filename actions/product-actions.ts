@@ -25,10 +25,7 @@ export const getProducts = async ({
   }
 
   const { data: products }: AxiosResponse<Product[]> = await axios.get(
-    `${PRODUCT_URL}?${params.toString()}`,
-    {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    }
+    `${PRODUCT_URL}?${params.toString()}`
   );
 
   return products;
@@ -42,10 +39,7 @@ interface ProductByCategoryProps {
 
 export const getProductById = async (productId: string): Promise<Product> => {
   const { data: product }: AxiosResponse<Product> = await axios.get(
-    `${PRODUCT_URL}/${productId}`,
-    {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    }
+    `${PRODUCT_URL}/${productId}`
   );
 
   return product;
@@ -64,13 +58,9 @@ export const getProductByCategories = async ({
     params.append("currentPage", currentPage.toString());
     params.append("resultsPerPage", resultsPerPage.toString());
   }
-
-  const { data: products }: AxiosResponse<Product[]> = await axios.get(
-    `${PRODUCT_URL}?${params.toString()}`,
-    {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    }
-  );
+  const url = `${PRODUCT_URL}?${params.toString()}`;
+  
+  const { data: products }: AxiosResponse<Product[]> = await axios.get(url);
 
   return products;
 };
@@ -100,11 +90,15 @@ export const getFeaturedOrNewArrivalProducts = async ({
   }
 
   const { data: products }: AxiosResponse<Product[]> = await axios.get(
-    `${PRODUCT_URL}?${params.toString()}`,
-    {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    }
+    `${PRODUCT_URL}?${params.toString()}`
   );
 
   return products;
+};
+
+export const searchProducts = async (searchString: string) => {
+  const { data }: AxiosResponse<Product[]> = await axios.get(
+    `${PRODUCT_URL}/search?find=${searchString}`
+  );
+  return data;
 };

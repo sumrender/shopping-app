@@ -1,18 +1,23 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { getAllCategories } from "@/actions/category-actions";
 import { Category } from "@/models/category.interface";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
 
 const gradientColors = [
-  ["#FF9A9E", "#FAD0C4"], // Gradient 1
-  ["#FFDDE1", "#EE9CA7"], // Gradient 2
-  ["#FF9A9E", "#FECFEF"], // Gradient 3
-  ["#A1C4FD", "#C2E9FB"], // Gradient 4
-  ["#D4FC79", "#96E6A1"], // Gradient 5
-  // ...add as many as you like
+  ["#FF9A9E", "#FAD0C4"],
+  ["#FFDDE1", "#EE9CA7"],
+  ["#FF9A9E", "#FECFEF"],
+  ["#A1C4FD", "#C2E9FB"],
+  ["#D4FC79", "#96E6A1"],
 ];
 
 const getGradient = (index: number) =>
@@ -29,6 +34,10 @@ const Categories = () => {
     fetchData();
   }, []);
 
+  function handlePress(item: Category) {
+    router.push(`/category/${item.name}`);
+  }
+
   const renderCategory = ({
     item,
     index,
@@ -38,19 +47,19 @@ const Categories = () => {
   }) => {
     const gradient = getGradient(index);
     return (
-      <Link href={`/category/${item.name}`} asChild>
+      <TouchableOpacity onPress={() => handlePress(item)}>
         <LinearGradient
           colors={gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.categoryContainer}
         >
-            <Text style={styles.categoryName}>
-              {item.name.charAt(0).toUpperCase() +
-                item.name.slice(1).toLowerCase()}
-            </Text>
+          <Text style={styles.categoryName}>
+            {item.name.charAt(0).toUpperCase() +
+              item.name.slice(1).toLowerCase()}
+          </Text>
         </LinearGradient>
-      </Link>
+      </TouchableOpacity>
     );
   };
 
@@ -79,19 +88,19 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     margin: 10,
-    padding: 45,
-    borderRadius: 10,
+    padding: 30,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 5,
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   categoryName: {
-    fontSize: 14,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
     color: "#333",
     textAlign: "center",
   },

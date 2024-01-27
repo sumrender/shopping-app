@@ -6,13 +6,14 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { Product } from "@/models/product.interface";
 import { addItemToCart } from "@/actions/cart-actions";
-import { HorizontalCmpEnum } from "@/constants/categories.enums";
+import { HorizontalCmpEnum } from "@/constants/enums";
 
 interface HorizontalProductsListProps {
   title: string;
@@ -32,11 +33,16 @@ const HorizontalProductsList: React.FC<HorizontalProductsListProps> = ({
   const renderItem = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
       <Link href={`/product/${item._id}`} asChild>
-        <View>
-          <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-          <Text style={styles.productName}>{item.name}</Text>
-          <Text style={styles.productPrice}>₹{item.price}</Text>
-        </View>
+        <Pressable>
+          <View>
+            <Image
+              source={{ uri: item.images[0] }}
+              style={styles.productImage}
+            />
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.productPrice}>₹{item.price}</Text>
+          </View>
+        </Pressable>
       </Link>
       <TouchableOpacity
         style={styles.addToCartButton}

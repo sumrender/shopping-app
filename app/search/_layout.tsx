@@ -1,33 +1,60 @@
-import { generateDummyProducts } from '@/data/utils';
-import { IProduct } from '@/models/product';
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, FlatList, Text, Image, StyleSheet } from 'react-native';
-import dummyProducts from "@/data/dummyProducts.json";
-import { Colors } from '@/constants/Colors';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  TextInput,
+  FlatList,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+} from "react-native";
+import { Colors } from "@/constants/Colors";
+import { searchProducts } from "@/actions/product-actions";
+import { Product } from "@/models/product.interface";
+import { Link } from "expo-router";
 
-const SearchScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState<IProduct[]>([]);
+const debounce = <T extends any[]>(func: (...args: T) => void, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+
+  return (...args: T) => {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+
+const SearchScreen: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
-  useEffect(() => {
-    if (searchQuery) {
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
       setLoading(true);
       setNotFound(false);
-      // Simulate an API call
-      setTimeout(() => {
-        const results = dummyProducts.filter(product =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setProducts(results);
-        setLoading(false);
-        setNotFound(results.length === 0);
-      }, 2000);
-    } else {
-      setProducts([]);
-    }
-  }, [searchQuery]);
+
+      if (query) {
+        const data = await searchProducts(query);
+        if (data.length === 0) {
+          setNotFound(true);
+        }
+        setProducts(data);
+      } else {
+        setProducts([]);
+      }
+
+      setLoading(false);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
 
   return (
     <View style={styles.container}>
@@ -45,21 +72,29 @@ const SearchScreen = () => {
       ) : (
         <FlatList
           data={products}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <View style={styles.productContainer}>
-              <View style={styles.productDetails}>
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text>{`$${item.price}`}</Text>
-              </View>
-              <Image source={{ uri: item.url }} style={styles.productImage} />
-            </View>
+            <Link href={`/product/${item._id}`} asChild>
+              <Pressable>
+                <View style={styles.productContainer}>
+                  <View style={styles.productDetails}>
+                    <Text style={styles.productName}>{item.name}</Text>
+                    <Text>{`₹${item.price}`}</Text>
+                  </View>
+                  <Image
+                    source={{ uri: item.images[0] }}
+                    style={styles.productImage}
+                  />
+                </View>
+              </Pressable>
+            </Link>
           )}
         />
       )}
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -78,13 +113,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.WHITE,
   },
   productContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
     padding: 15,
     backgroundColor: Colors.WHITE,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -96,7 +131,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.ORANGE,
     marginBottom: 5,
   },

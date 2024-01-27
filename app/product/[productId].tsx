@@ -41,10 +41,10 @@ const ProductScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {product && (
+      {product ? (
         <View style={styles.container}>
+          <Image source={{ uri: product?.images[0] }} style={styles.image} />
           <ScrollView style={styles.scrollView}>
-            <Image source={{ uri: product?.images[0] }} style={styles.image} />
             <Text style={styles.title}>{product.name}</Text>
             <Text style={styles.price}>₹ {product.price}</Text>
             <Text style={styles.description}>{product.description}</Text>
@@ -65,7 +65,7 @@ const ProductScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-      )}
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: "white",
+    paddingLeft: 10,
   },
   image: {
     width: "100%",

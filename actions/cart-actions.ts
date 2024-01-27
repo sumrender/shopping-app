@@ -15,6 +15,10 @@ async function setCart(cart: CartItem[]) {
   await AsyncStorage.setItem(CART, JSON.stringify(cart));
 }
 
+export async function clearCart() {
+  await setCart([]);
+}
+
 export const addItemToCart = async (item: Product | CartItem) => {
   let cart = await getCartItems();
   const existingItemIndex = cart.findIndex(

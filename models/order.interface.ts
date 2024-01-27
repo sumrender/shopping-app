@@ -21,6 +21,9 @@ export interface Order {
   isPaid: boolean;
   orderStatus: string;
   orderItems: OrderItem[];
+  finalPrice: number;
+  razorpayOrderId: string;
+  isOnlinePaymentVerified?: boolean;
 }
 
 export enum OrderStatusEnum {
@@ -38,7 +41,7 @@ export const orderStatusArray = [
 ];
 
 export interface FormattedOrderItem extends OrderItem {
-    createdAt: string;
-    paymentMode: string;
-    orderStatus: string;
+  createdAt: string;
+  paymentMode: string;
+  orderStatus: string;
 }

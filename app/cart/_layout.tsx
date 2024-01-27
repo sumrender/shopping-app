@@ -6,72 +6,46 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import CartProducts from "@/components/CartProducts";
 import Separator from "@/components/Separator";
 import { CartItem } from "@/models/product.interface";
 import { getCartItems } from "@/actions/cart-actions";
 import { DELIVERY_CHARGE } from "@/constants/data";
+import { useAuth } from "@/hooks/use-auth";
+import CartComponent from "@/components/Cart";
 
 const CartScreen: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalMRP, setTotalMRP] = useState(0);
   const [finalPrice, setFinalPrice] = useState(0);
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const data = await getCartItems();
         setCart(data);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching cart products:", error);
       }
     };
 
     fetchCart();
   }, []);
 
-  useEffect(() => {
-    const total = cart.reduce((total, item) => {
-      return total + item.price * item.cartQuantity;
-    }, 0);
-    setTotalMRP(total);
-    if (total < 500) {
-      setFinalPrice(total + DELIVERY_CHARGE);
-    } else {
-      setFinalPrice(total);
-    }
-  }, [cart]);
-
   return (
     <>
-      <ScrollView style={styles.container}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.heading}>Items added ({cart.length})</Text>
-        </View>
-        <CartProducts cart={cart} setCart={setCart} />
-
-        {cart.length > 0 && (
-          <View style={styles.billColumn}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.heading}>Bill Details</Text>
-            </View>
-            <View style={styles.billRow}>
-              <Text style={styles.billText}>MRP Total</Text>
-              <Text style={styles.billAmount}>₹ {totalMRP}</Text>
-            </View>
-            <View style={styles.billRow}>
-              <Text style={styles.billText}>Shipping & Handling</Text>
-              <Text style={styles.billAmount}>₹ {DELIVERY_CHARGE}</Text>
-            </View>
-            <Separator />
-            <View style={styles.billRow}>
-              <Text style={styles.billText}>Grand Total</Text>
-              <Text style={styles.billAmount}>₹ {finalPrice}</Text>
-            </View>
-          </View>
-        )}
-      </ScrollView>
+      <View  style={styles.container}>
+        <CartComponent
+          cart={cart}
+          setCart={setCart}
+          totalMRP={totalMRP}
+          setTotalMRP={setTotalMRP}
+          finalPrice={finalPrice}
+          setFinalPrice={setFinalPrice}
+        />
+      </View>
       <View style={styles.checkoutBtnContainer}>
         <Link href="/checkout" asChild>
           <TouchableOpacity style={styles.checkoutBtn}>

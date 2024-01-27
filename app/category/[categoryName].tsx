@@ -1,9 +1,7 @@
-// Import necessary components
-import { getProductByCategories, getProducts } from "@/actions/product-actions";
+import { getProductByCategories } from "@/actions/product-actions";
 import { Colors } from "@/constants/Colors";
 import { RESULTS_PER_PAGE } from "@/constants/data";
 import { Product } from "@/models/product.interface";
-import { FontAwesome } from "@expo/vector-icons";
 import { Link, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
@@ -17,7 +15,7 @@ import {
 } from "react-native";
 
 const ProductList = () => {
-  const { category } = useLocalSearchParams<{ category: string }>();
+  const { categoryName } = useLocalSearchParams<{ categoryName: string }>();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [reachedEnd, setReachedEnd] = useState(false);
@@ -29,11 +27,10 @@ const ProductList = () => {
     if (reachedEnd) return;
 
     const moreProducts = await getProductByCategories({
-      category,
+      category: categoryName,
       currentPage,
       resultsPerPage: RESULTS_PER_PAGE,
     });
-    console.log(moreProducts);
     setProducts([...products, ...moreProducts]);
     setCurrentPage((prev) => prev + 1);
     if (moreProducts.length == 0 || moreProducts.length < RESULTS_PER_PAGE) {
@@ -42,7 +39,7 @@ const ProductList = () => {
     }
   };
 
-  const handleSorting = () => {};
+  // const handleSorting = () => {};
 
   useEffect(() => {
     if (searchQuery) {
@@ -58,7 +55,9 @@ const ProductList = () => {
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
       <Link href={`/product/${item._id}`}>
+        <View style={styles.imageContainer}>
         <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+        </View>
       </Link>
       <View style={styles.productDetails}>
         <Link href={`/product/${item._id}`}>
@@ -82,9 +81,9 @@ const ProductList = () => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.sortButton} onPress={handleSorting}>
+        {/* <TouchableOpacity style={styles.sortButton} onPress={handleSorting}>
           <FontAwesome name="sort" size={24} color={Colors.WHITE} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <FlatList
@@ -95,7 +94,11 @@ const ProductList = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => (
           <View style={styles.loading}>
-            {reachedEnd ? <Text>No more...</Text> : <Text>Loading...</Text>}
+            {reachedEnd ? (
+              <></>
+            ) : (
+              <Text>Loading...</Text>
+            )}
           </View>
         )}
       />
@@ -156,6 +159,10 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 14,
     color: Colors.ORANGE,
+  },
+  imageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   productImage: {
     width: 80,

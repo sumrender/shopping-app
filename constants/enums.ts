@@ -20,3 +20,8 @@ export enum HorizontalCmpEnum {
   IS_FEATURED = "isFeatured",
   IS_NEW = "isNew",
 }
+
+export enum PaymentModeEnum {
+  COD = 'cash on delivery',
+  ONLINE = 'online',
+}

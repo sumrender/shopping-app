@@ -1,3 +1,6 @@
+import { isValidMobileNumber, register } from "@/actions/user-actions";
+import { Colors } from "@/constants/Colors";
+import { Link, router } from "expo-router";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -6,60 +9,73 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { Link } from "expo-router";
 
 const RegisterScreen: React.FC = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [mobileNumberError, setMobileNumberError] = useState("");
 
-  const handleRegister = () => {
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const sendOtp = async () => {
+    setMobileNumberError("");
+    if (!mobileNumber) {
+      setMobileNumberError("Mobile number is required");
+      return;
+    }
+
+    if (!isValidMobileNumber(mobileNumber)) {
+      setMobileNumberError("Enter a valid mobile number");
+      return;
+    }
+
+    const statusCode = await register(mobileNumber);
+
+    if (statusCode === 409) {
+      setMobileNumberError("An account already exists. Log in");
+      return;
+    }
+    if (statusCode === 500) {
+      setMobileNumberError("Please try again after some time");
+      return;
+    }
+    router.push(`/auth/${mobileNumber}`);
   };
+
+  function MobileNumberForm() {
+    return (
+      <>
+        <TextInput
+          style={
+            mobileNumberError
+              ? { ...styles.input, ...styles.errorInput }
+              : styles.input
+          }
+          placeholder="Enter Mobile Number"
+          keyboardType="phone-pad"
+          onChangeText={(text) => setMobileNumber(text)}
+        />
+        <TouchableOpacity style={styles.registerButton} onPress={sendOtp}>
+          <Text style={styles.registerButtonText}>Send OTP</Text>
+        </TouchableOpacity>
+        {mobileNumberError ? (
+          <Text style={styles.errorText}>{mobileNumberError}</Text>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Name"
-          autoCapitalize="words"
-          onChangeText={(text) => setName(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          onChangeText={(text) => setEmail(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          onChangeText={(text) => setPassword(text)}
-        />
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={handleRegister}
-        >
-          <Text style={styles.registerButtonText}>Register</Text>
-        </TouchableOpacity>
-      </View>
+      <View style={styles.formContainer}>{MobileNumberForm()}</View>
       <View style={styles.bottomContainer}>
-        <Link href={"/auth/login"} asChild>
-          <TouchableOpacity style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>Login</Text>
+        <Link href={"/auth/register"} asChild>
+          <TouchableOpacity style={styles.loginBtn}>
+            <Text>Already Have an account? </Text>
+            <Text style={styles.loginBtnText}>Log in</Text>
           </TouchableOpacity>
         </Link>
       </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -75,7 +91,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: "#CCCCCC",
+    borderColor: Colors.DARK_GRAY,
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 15,
@@ -94,14 +110,24 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
   },
-  loginButton: {
+  loginBtn: {
+    flexDirection: "row",
     padding: 10,
   },
-  loginButtonText: {
+  loginBtnText: {
     color: Colors.ORANGE,
     fontWeight: "bold",
+  },
+  errorInput: {
+    borderColor: Colors.RED,
+  },
+  errorText: {
+    color: Colors.RED,
+    marginBottom: 5,
   },
 });
 

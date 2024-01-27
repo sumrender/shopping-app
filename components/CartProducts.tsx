@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import dummyProducts from "@/data/dummyProducts.json";
 import { Link } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import Separator from "./Separator";

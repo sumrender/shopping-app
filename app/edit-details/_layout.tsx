@@ -1,68 +1,94 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import { Colors } from "@/constants/Colors";
+import { updateUserDetails } from "@/actions/user-actions";
+import { useAuth } from "@/hooks/use-auth";
+import { router } from "expo-router";
 
 const UserProfileForm = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [street, setStreet] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const { user, accessToken, setUser } = useAuth();
+  const initialFirstName = user?.firstName ? user.firstName : "";
+  const initialLastName = user?.lastName ? user.lastName : "";
+  const initialStreet = user?.street ? user.street : "";
+  const initialCity = user?.city ? user.city : "";
+  const initialState = user?.state ? user.state : "";
+  const initialZipCode = user?.zipCode ? user.zipCode : "";
 
-  const handleSubmit = () => {
-    // Handle the submission of the form
-    console.log(firstName, lastName, street, city, state, zipCode);
+  const [firstName, setFirstName] = useState(initialFirstName);
+  const [lastName, setLastName] = useState(initialLastName);
+  const [street, setStreet] = useState(initialStreet);
+  const [city, setCity] = useState(initialCity);
+  const [state, setState] = useState(initialState);
+  const [zipCode, setZipCode] = useState(initialZipCode);
+
+  const handleSubmit = async () => {
+    if (!firstName || !lastName || !street || !city || !state || !zipCode) {
+      console.log("fields cannot be empty"); // toast
+      return;
+    }
+
+    const updatedUser = await updateUserDetails(accessToken!, {
+      firstName,
+      lastName,
+      street,
+      city,
+      state,
+      zipCode,
+    });
+    if (updatedUser) {
+      setUser(updatedUser);
+      router.replace("/account");
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>First Name</Text>
+      <Text style={styles.label}>
+        First Name<Text style={styles.compulsory}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         value={firstName}
         onChangeText={setFirstName}
-        placeholder="Enter your first name"
       />
 
-      <Text style={styles.label}>Last Name</Text>
+      <Text style={styles.label}>
+        Last Name<Text style={styles.compulsory}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         value={lastName}
         onChangeText={setLastName}
-        placeholder="Enter your last name"
       />
 
-      <Text style={styles.label}>Street</Text>
-      <TextInput
-        style={styles.input}
-        value={street}
-        onChangeText={setStreet}
-        placeholder="Enter your street"
-      />
+      <Text style={styles.label}>
+        Street<Text style={styles.compulsory}>*</Text>
+      </Text>
+      <TextInput style={styles.input} value={street} onChangeText={setStreet} />
 
-      <Text style={styles.label}>City</Text>
-      <TextInput
-        style={styles.input}
-        value={city}
-        onChangeText={setCity}
-        placeholder="Enter your city"
-      />
+      <Text style={styles.label}>
+        City<Text style={styles.compulsory}>*</Text>
+      </Text>
+      <TextInput style={styles.input} value={city} onChangeText={setCity} />
 
-      <Text style={styles.label}>State</Text>
-      <TextInput
-        style={styles.input}
-        value={state}
-        onChangeText={setState}
-        placeholder="Enter your state"
-      />
+      <Text style={styles.label}>
+        State<Text style={styles.compulsory}>*</Text>
+      </Text>
+      <TextInput style={styles.input} value={state} onChangeText={setState} />
 
-      <Text style={styles.label}>Zip Code</Text>
+      <Text style={styles.label}>
+        Zip Code<Text style={styles.compulsory}>*</Text>
+      </Text>
       <TextInput
         style={styles.input}
         value={zipCode}
         onChangeText={setZipCode}
-        placeholder="Enter your zip code"
         keyboardType="numeric"
       />
 
@@ -84,6 +110,10 @@ const styles = StyleSheet.create({
     color: Colors.ORANGE,
     marginBottom: 5,
   },
+  compulsory: {
+    color: "red",
+    fontSize: 22,
+  },
   input: {
     borderWidth: 1,
     borderColor: Colors.ORANGE,
@@ -96,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.ORANGE,
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
     color: Colors.WHITE,

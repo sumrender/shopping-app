@@ -1,10 +1,8 @@
-// Import necessary components
-import { getFeaturedOrNewArrivalProducts, getProductByCategories, getProducts } from "@/actions/product-actions";
+import { getFeaturedOrNewArrivalProducts } from "@/actions/product-actions";
 import { Colors } from "@/constants/Colors";
-import { HorizontalCmpEnum } from "@/constants/categories.enums";
+import { HorizontalCmpEnum } from "@/constants/enums";
 import { RESULTS_PER_PAGE } from "@/constants/data";
 import { Product } from "@/models/product.interface";
-import { FontAwesome } from "@expo/vector-icons";
 import { Link, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
@@ -16,6 +14,7 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
+import { addItemToCart } from "@/actions/cart-actions";
 
 const ProductList = () => {
   const { query } = useLocalSearchParams<{ query: string }>();
@@ -30,10 +29,10 @@ const ProductList = () => {
     if (reachedEnd) return;
 
     const filter: any = {};
-    if(query == HorizontalCmpEnum.IS_FEATURED){
+    if (query == HorizontalCmpEnum.IS_FEATURED) {
       filter.isFeatured = true;
     }
-    if(query == HorizontalCmpEnum.IS_NEW){
+    if (query == HorizontalCmpEnum.IS_NEW) {
       filter.isNew = true;
     }
 
@@ -42,7 +41,6 @@ const ProductList = () => {
       currentPage,
       resultsPerPage: RESULTS_PER_PAGE,
     });
-    console.log(moreProducts);
     setProducts([...products, ...moreProducts]);
     setCurrentPage((prev) => prev + 1);
     if (moreProducts.length == 0 || moreProducts.length < RESULTS_PER_PAGE) {
@@ -51,7 +49,11 @@ const ProductList = () => {
     }
   };
 
-  const handleSorting = () => {};
+  const handleAddToCart = async (item: Product) => {
+    await addItemToCart(item);
+  };
+
+  // const handleSorting = () => {};
 
   useEffect(() => {
     if (searchQuery) {
@@ -64,22 +66,32 @@ const ProductList = () => {
     }
   }, [searchQuery, products]);
 
-  const renderProduct = ({ item }: { item: Product }) => (
-    <View style={styles.productContainer}>
-      <Link href={`/product/${item._id}`}>
-        <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-      </Link>
-      <View style={styles.productDetails}>
+  const renderProduct = ({ item }: { item: Product }) => {
+    return (
+      <View style={styles.productContainer}>
         <Link href={`/product/${item._id}`}>
-          <Text style={styles.productName}>{item.name}</Text>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: item.images[0] }}
+              style={styles.productImage}
+            />
+          </View>
         </Link>
-        <Text style={styles.productPrice}>₹{item.price}</Text>
+        <View style={styles.productDetails}>
+          <Link href={`/product/${item._id}`}>
+            <Text style={styles.productName}>{item.name}</Text>
+          </Link>
+          <Text style={styles.productPrice}>₹{item.price}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.addToCartButton}
+          onPress={() => handleAddToCart(item)}
+        >
+          <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.addToCartButton}>
-        <Text style={styles.addToCartButtonText}>Add to Cart</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -91,9 +103,9 @@ const ProductList = () => {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <TouchableOpacity style={styles.sortButton} onPress={handleSorting}>
+        {/* <TouchableOpacity style={styles.sortButton} onPress={handleSorting}>
           <FontAwesome name="sort" size={24} color={Colors.WHITE} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <FlatList
@@ -104,7 +116,7 @@ const ProductList = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => (
           <View style={styles.loading}>
-            {reachedEnd ? <Text>No more...</Text> : <Text>Loading...</Text>}
+            {reachedEnd ? <></> : <Text>Loading...</Text>}
           </View>
         )}
       />
@@ -166,9 +178,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.ORANGE,
   },
+  imageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   productImage: {
+    borderWidth: 2,
     width: 80,
-    height: 80,
+    height: 100,
     borderRadius: 5,
   },
   addToCartButton: {

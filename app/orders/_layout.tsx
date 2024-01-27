@@ -4,6 +4,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import { FormattedOrderItem, Order } from "@/models/order.interface";
 import { getAllOrders } from "@/actions/order-actions";
 import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/hooks/use-auth";
+import { router } from "expo-router";
 
 function formatOrders(data: Order[]) {
   const formattedOrderItems: FormattedOrderItem[] = [];
@@ -11,6 +13,7 @@ function formatOrders(data: Order[]) {
     order.orderItems.forEach((o) => {
       const item: FormattedOrderItem = {
         ...o,
+        price: o.price * o.quantity,
         createdAt: order.createdAt,
         paymentMode: order.paymentMode,
         orderStatus: order.orderStatus,
@@ -22,11 +25,16 @@ function formatOrders(data: Order[]) {
 }
 
 const OrderScreen: React.FC = () => {
+  const { accessToken } = useAuth();
+  if (!accessToken) {
+    router.replace("/auth/login");
+    // return null;
+  }
   const [orders, setOrders] = useState<FormattedOrderItem[]>([]);
 
   useEffect(() => {
     async function fetchOrders() {
-      const data = await getAllOrders();
+      const data = await getAllOrders(accessToken!);
       const formattedOrders = formatOrders(data);
       setOrders(formattedOrders);
     }
@@ -37,38 +45,52 @@ const OrderScreen: React.FC = () => {
     <View style={styles.orderItemContainer}>
       <Image source={{ uri: item.image }} style={styles.productImage} />
       <View style={styles.productDetails}>
-        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productName}>
+          {item.name} ({item.quantity})
+        </Text>
         <Text style={styles.productPrice}>₹ {item.price.toFixed(2)}</Text>
       </View>
       <View>
         <Text>
           Payment Mode:{" "}
-          <span style={styles.paymentMode}>{item.paymentMode}</span>
+          <Text style={styles.paymentMode}>{item.paymentMode}</Text>
         </Text>
         {item.orderStatus === "delivered" ? (
           <Text>
             Delivery Status:{" "}
-            <span style={styles.deliveryStatus}>{item.orderStatus}</span>
+            <Text style={styles.deliveryStatus}>{item.orderStatus}</Text>
           </Text>
         ) : (
           <Text>
             Delivery Status:{" "}
-            <span style={styles.orderStatus}>{item.orderStatus}</span>
+            <Text style={styles.orderStatus}>{item.orderStatus}</Text>
           </Text>
         )}
       </View>
     </View>
   );
 
-  return (
-    <View style={styles.container}>
+  const renderOrders = () => {
+    if (orders.length === 0) {
+      return (
+        <View style={styles.noOrdersContainer}>
+          <Text style={styles.noOrdersText}>
+            No orders placed. Go to the products page to start shopping!
+          </Text>
+        </View>
+      );
+    }
+
+    return (
       <FlatList
         data={orders}
         keyExtractor={(item) => item.product}
         renderItem={renderItem}
       />
-    </View>
-  );
+    );
+  };
+
+  return <View style={styles.container}>{renderOrders()}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -117,6 +139,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#33B5FF",
     marginTop: 5,
+  },
+  noOrdersContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noOrdersText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#666666",
   },
 });
 

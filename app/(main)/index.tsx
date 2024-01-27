@@ -9,9 +9,11 @@ import {
 import { Product } from "@/models/product.interface";
 import { Billboard } from "@/models/billboard.interface";
 import { getAllBillboards } from "@/actions/billboard-actions";
-import { HorizontalCmpEnum } from "@/constants/categories.enums";
+import { HorizontalCmpEnum } from "@/constants/enums";
+import { useAuth } from "@/hooks/use-auth";
 
 const Home = () => {
+  const { fetchUserFromLocalStorage } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [billboards, setBillboards] = useState<Billboard[]>([]);
@@ -27,9 +29,8 @@ const Home = () => {
         const newArrivalData = await getFeaturedOrNewArrivalProducts({
           isNew: true,
           currentPage: 1,
-          resultsPerPage: 10
-        })
-        console.log(newArrivalData, featured);
+          resultsPerPage: 10,
+        });
         const billboardsArray = await getAllBillboards();
         setFeaturedProducts(featured);
         setNewArrivals(newArrivalData);
@@ -40,11 +41,12 @@ const Home = () => {
     };
 
     fetchData();
+    fetchUserFromLocalStorage();
   }, []);
 
   return (
     <ScrollView>
-      {billboards.length > 0 && <Carousel billboards={billboards} />}
+      {billboards.length > 0 ? <Carousel billboards={billboards} />: null}
       <HorizontalProductsList
         products={featuredProducts}
         title="Featured Products"

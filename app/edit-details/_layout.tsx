@@ -5,6 +5,7 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { updateUserDetails } from "@/actions/user-actions";
@@ -29,7 +30,7 @@ const UserProfileForm = () => {
 
   const handleSubmit = async () => {
     if (!firstName || !lastName || !street || !city || !state || !zipCode) {
-      console.log("fields cannot be empty"); // toast
+      ToastAndroid.show("Fields cannot be empty", ToastAndroid.SHORT);
       return;
     }
 

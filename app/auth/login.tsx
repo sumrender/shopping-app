@@ -8,25 +8,31 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
 } from "react-native";
 
 const LoginScreen: React.FC = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileNumberError, setMobileNumberError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const sendOtp = async () => {
+    setLoading(true);
     setMobileNumberError("");
     if (!mobileNumber) {
       setMobileNumberError("Mobile number is required");
+      setLoading(true);
       return;
     }
 
     if (!isValidMobileNumber(mobileNumber)) {
       setMobileNumberError("Enter a valid mobile number");
+      setLoading(true);
       return;
     }
 
     const otpSent = await login(mobileNumber);
+    setLoading(false);
     if (!otpSent) {
       setMobileNumberError("Please try again after some time");
       return;
@@ -47,8 +53,16 @@ const LoginScreen: React.FC = () => {
           keyboardType="phone-pad"
           onChangeText={(text) => setMobileNumber(text)}
         />
-        <TouchableOpacity style={styles.loginButton} onPress={sendOtp}>
-          <Text style={styles.loginButtonText}>Send OTP</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={sendOtp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={Colors.WHITE} />
+          ) : (
+            <Text style={styles.loginButtonText}>Send OTP</Text>
+          )}
         </TouchableOpacity>
         {mobileNumberError ? (
           <Text style={styles.errorText}>{mobileNumberError}</Text>

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, router } from "expo-router";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -11,12 +19,18 @@ import { clearCart, getCartItems } from "@/actions/cart-actions";
 import CartComponent from "@/components/Cart";
 import { createOrder, razorpayFn, verifyOrder } from "@/actions/order-actions";
 import { PaymentModeEnum } from "@/constants/enums";
+import * as Location from "expo-location";
+import * as geolib from "geolib";
+import { RADIUS_IN_METRES, SHOP_LOCATION } from "@/constants/data";
 
 const CheckoutScreen = () => {
+  const [loading, setLoading] = useState(false);
+  const [locationNearShop, setLocationNearShop] = useState(false);
   const [isPaymentOnline, setIsPaymentOnline] = useState(true);
   const [totalMRP, setTotalMRP] = useState(0);
   const [finalPrice, setFinalPrice] = useState(0);
   const { user, accessToken } = useAuth();
+
   if (!user) {
     router.replace("/auth/login");
   }
@@ -32,6 +46,7 @@ const CheckoutScreen = () => {
     address = `${street}, ${city}, ${state}, ${zipCode}`;
   }
 
+  // fetches cart items
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -45,8 +60,55 @@ const CheckoutScreen = () => {
     fetchCart();
   }, []);
 
+  // gets current location
+  useEffect(() => {
+    const getPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== Location.PermissionStatus.GRANTED) {
+        console.log("Please grant location permissions");
+        Alert.alert("Please grant location permissions");
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+
+      const distanceMeters = geolib.getDistance(SHOP_LOCATION, {
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+      console.log("🚀 ~ getPermissions ~ distanceMeters:", distanceMeters);
+
+      if (distanceMeters > RADIUS_IN_METRES) {
+        setLocationNearShop(false);
+        Alert.alert(
+          `Sorry, Currently only accepting orders upto ${
+            RADIUS_IN_METRES / 1000
+          } kms only`
+        );
+      } else {
+        setLocationNearShop(true);
+      }
+    };
+    getPermissions();
+  }, []);
+
   async function placeOrder() {
+    setLoading(true);
     try {
+      if (!locationNearShop) {
+        console.log(
+          `Sorry, Currently only accepting orders upto ${
+            RADIUS_IN_METRES / 1000
+          } kms only`
+        );
+        Alert.alert(
+          `Sorry, Currently only accepting orders upto ${
+            RADIUS_IN_METRES / 1000
+          } kms only`
+        );
+        setLoading(false);
+        return;
+      }
       if (isPaymentOnline) {
         const newOrder = await createOrder({
           accessToken: accessToken!,
@@ -74,10 +136,19 @@ const CheckoutScreen = () => {
           finalPrice,
         });
       }
+      setLoading(false);
       await clearCart();
       router.replace("/");
+      ToastAndroid.show(
+        "Your order has been placed successfully!",
+        ToastAndroid.SHORT
+      );
     } catch (error) {
       console.log("error placing order", error);
+      ToastAndroid.show(
+        "Something went wrong. Please try again after some time.",
+        ToastAndroid.SHORT
+      );
     }
   }
 
@@ -151,8 +222,16 @@ const CheckoutScreen = () => {
         ) : null}
       </View>
       <View style={styles.bottomSection}>
-        <Pressable style={styles.placeOrderButton} onPress={placeOrder}>
-          <Text style={styles.placeOrderButtonText}>Place Order</Text>
+        <Pressable
+          style={styles.placeOrderButton}
+          onPress={placeOrder}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={Colors.WHITE} />
+          ) : (
+            <Text style={styles.placeOrderButtonText}>Place Order</Text>
+          )}
         </Pressable>
       </View>
     </>

@@ -46,7 +46,7 @@ const Home = () => {
 
   return (
     <ScrollView>
-      {billboards.length > 0 ? <Carousel billboards={billboards} />: null}
+      {billboards.length > 0 ? <Carousel billboards={billboards} /> : null}
       <HorizontalProductsList
         products={featuredProducts}
         title="Featured Products"

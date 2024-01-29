@@ -8,25 +8,31 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
 } from "react-native";
 
 const RegisterScreen: React.FC = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileNumberError, setMobileNumberError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const sendOtp = async () => {
+    setLoading(true);
     setMobileNumberError("");
     if (!mobileNumber) {
       setMobileNumberError("Mobile number is required");
+      setLoading(false);
       return;
     }
 
     if (!isValidMobileNumber(mobileNumber)) {
       setMobileNumberError("Enter a valid mobile number");
+      setLoading(false);
       return;
     }
 
     const statusCode = await register(mobileNumber);
+    setLoading(false);
 
     if (statusCode === 409) {
       setMobileNumberError("An account already exists. Log in");
@@ -52,8 +58,12 @@ const RegisterScreen: React.FC = () => {
           keyboardType="phone-pad"
           onChangeText={(text) => setMobileNumber(text)}
         />
-        <TouchableOpacity style={styles.registerButton} onPress={sendOtp}>
-          <Text style={styles.registerButtonText}>Send OTP</Text>
+        <TouchableOpacity style={styles.registerButton} onPress={sendOtp} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color={Colors.WHITE} />
+          ) : (
+            <Text style={styles.registerButtonText}>Send OTP</Text>
+          )}
         </TouchableOpacity>
         {mobileNumberError ? (
           <Text style={styles.errorText}>{mobileNumberError}</Text>

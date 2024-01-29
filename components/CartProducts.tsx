@@ -6,6 +6,7 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Link } from "expo-router";
@@ -25,6 +26,13 @@ interface CartProductsProps {
 
 const CartProducts: React.FC<CartProductsProps> = ({ cart = [], setCart }) => {
   async function increaseQuantity(item: CartItem) {
+    if (item.cartQuantity >= item.quantity) {
+      ToastAndroid.show(
+        "You've reached the maximum available quantity for this item.",
+        ToastAndroid.SHORT
+      );
+      return;
+    }
     const newCart = await addItemToCart(item);
     setCart(newCart);
   }

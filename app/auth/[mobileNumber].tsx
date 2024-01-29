@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
 } from "react-native";
 
 const VerifyOtpScreen: React.FC = () => {
@@ -16,20 +17,24 @@ const VerifyOtpScreen: React.FC = () => {
   const { setUserAndAccessToken } = useAuth();
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleOtp = async () => {
+    setLoading(true);
     setOtpError("");
     if (!otp) {
       setOtpError("OTP is required");
+      setLoading(false);
       return;
     }
 
     const data = await verifyOtp(mobileNumber, otp);
     if (!data) {
       setOtpError("Incorrect OTP");
+      setLoading(false);
       return;
     }
-
+    setLoading(false);
     setUserAndAccessToken(data.user, data.accessToken);
     router.push("/");
   };
@@ -44,8 +49,16 @@ const VerifyOtpScreen: React.FC = () => {
           placeholder={`Enter OTP sent to ${mobileNumber}`}
           onChangeText={(text) => setOtp(text)}
         />
-        <TouchableOpacity style={styles.loginButton} onPress={handleOtp}>
-          <Text style={styles.loginButtonText}>Verify OTP</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleOtp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={Colors.WHITE} />
+          ) : (
+            <Text style={styles.loginButtonText}>Send OTP</Text>
+          )}
         </TouchableOpacity>
         {otpError ? <Text style={styles.errorText}>{otpError}</Text> : null}
       </View>

@@ -11,7 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import { Billboard } from "@/models/billboard.interface";
 
-const Carousel = ({ billboards }: { billboards: Billboard[] }) => {
+const Carousel = ({ billboards = [] }: { billboards: Billboard[] }) => {
   const flatlistRef = useRef<FlatList<Billboard> | null>(null);
   const screenWidth = Dimensions.get("window").width;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -47,7 +47,7 @@ const Carousel = ({ billboards }: { billboards: Billboard[] }) => {
     return (
       <View>
         <Image
-          source={{uri: item.url}}
+          source={{ uri: item.url }}
           style={{ height: 200, width: screenWidth }}
         />
       </View>

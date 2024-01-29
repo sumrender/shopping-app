@@ -1,5 +1,6 @@
 import { CartItem, Product } from "@/models/product.interface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ToastAndroid } from "react-native";
 
 const CART = "cart";
 
@@ -17,6 +18,7 @@ async function setCart(cart: CartItem[]) {
 
 export async function clearCart() {
   await setCart([]);
+  console.log("cart has been cleared!");
 }
 
 export const addItemToCart = async (item: Product | CartItem) => {
@@ -32,6 +34,7 @@ export const addItemToCart = async (item: Product | CartItem) => {
     cart.push(newItem);
   }
   setCart(cart);
+  ToastAndroid.show("Item added to cart!", ToastAndroid.SHORT);
   return cart;
 };
 
@@ -44,6 +47,7 @@ export const removeItemFromCart = async (item: CartItem) => {
     newCart.push(item);
   }
   setCart(newCart);
+  ToastAndroid.show("Item removed from cart!", ToastAndroid.SHORT);
   return newCart;
 };
 
@@ -51,5 +55,6 @@ export const removeAllQtyOfItem = async (item: CartItem) => {
   const cart = await getCartItems();
   const newCart = cart.filter((cartItem) => cartItem._id != item._id);
   setCart(newCart);
+  ToastAndroid.show("Item removed from cart!", ToastAndroid.SHORT);
   return newCart;
 };

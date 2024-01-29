@@ -1,7 +1,10 @@
-export const BASE_URL = "https://6bd2-212-102-51-246.ngrok-free.app";
+export const BASE_URL = "https://ecom-shopper.onrender.com";
 export const DELIVERY_CHARGE = 50;
 export const RESULTS_PER_PAGE = 10;
-export const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFAYy5jb20iLCJzdWIiOiI2NWE4YjFiY2Q0YjYyNDVhZGExMzkxODciLCJpYXQiOjE3MDU2NTcwMDksImV4cCI6MTcwNTY5MzAwOX0.v29eEsaq0v2ZMgN0jXaG1IvmJxNYMvdA1xZjud7tcII";
 
 export const RAZORPAY_KEY = "rzp_test_pP2l4X3n9GaHZx";
+
+const college = { latitude: 18.60711449110132, longitude: 73.87507576700652 };
+
+export const SHOP_LOCATION = college;
+export const RADIUS_IN_METRES = 14 * 1000;

@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { Link, router } from "expo-router";
+import { StyleSheet, Text, View, Pressable, Alert } from "react-native";
+import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import CartProducts from "@/components/CartProducts";
-import Separator from "@/components/Separator";
 import { CartItem } from "@/models/product.interface";
 import { getCartItems } from "@/actions/cart-actions";
-import { DELIVERY_CHARGE } from "@/constants/data";
 import { useAuth } from "@/hooks/use-auth";
 import CartComponent from "@/components/Cart";
 
 const CartScreen: React.FC = () => {
+  const { user } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalMRP, setTotalMRP] = useState(0);
   const [finalPrice, setFinalPrice] = useState(0);
@@ -34,25 +26,43 @@ const CartScreen: React.FC = () => {
     fetchCart();
   }, []);
 
+  function handleCheckout() {
+    if (!user) {
+      router.replace("/auth/login");
+    } else {
+      router.push("/checkout");
+    }
+  }
+
   return (
     <>
-      <View  style={styles.container}>
-        <CartComponent
-          cart={cart}
-          setCart={setCart}
-          totalMRP={totalMRP}
-          setTotalMRP={setTotalMRP}
-          finalPrice={finalPrice}
-          setFinalPrice={setFinalPrice}
-        />
-      </View>
-      <View style={styles.checkoutBtnContainer}>
-        <Link href="/checkout" asChild>
-          <TouchableOpacity style={styles.checkoutBtn}>
-            <Text style={styles.checkoutText}>Proceed to Checkout</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
+      {cart.length > 0 ? (
+        <>
+          <View style={styles.container}>
+            <CartComponent
+              cart={cart}
+              setCart={setCart}
+              totalMRP={totalMRP}
+              setTotalMRP={setTotalMRP}
+              finalPrice={finalPrice}
+              setFinalPrice={setFinalPrice}
+            />
+          </View>
+          <View style={styles.checkoutBtnContainer}>
+            <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
+              <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.noItemsContainer}>
+            <Text style={styles.noItemsText}>
+              Cart is empty. Go to the products page to start shopping!
+            </Text>
+          </View>
+        </>
+      )}
     </>
   );
 };
@@ -119,6 +129,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.WHITE,
     fontWeight: "bold",
+  },
+  noItemsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noItemsText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#666666",
   },
 });
 

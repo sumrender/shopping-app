@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   favButton: {
-    width: "35%",
+    width: "45%",
     marginLeft: 5,
     paddingHorizontal: 3,
     flexDirection: "row",

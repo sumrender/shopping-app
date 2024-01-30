@@ -32,8 +32,15 @@ const LoginScreen: React.FC = () => {
     }
 
     const otpSent = await login(mobileNumber);
+    if (otpSent === 400) {
+      setLoading(false);
+      setMobileNumberError(
+        "No account exists with this mobile number. Please create a new account."
+      );
+      return;
+    }
     setLoading(false);
-    if (!otpSent) {
+    if (otpSent > 400) {
       setMobileNumberError("Please try again after some time");
       return;
     }

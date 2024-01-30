@@ -1,3 +1,4 @@
+import { addItemToCart } from "@/actions/cart-actions";
 import { getProductByCategories } from "@/actions/product-actions";
 import { Colors } from "@/constants/Colors";
 import { RESULTS_PER_PAGE } from "@/constants/data";
@@ -9,9 +10,9 @@ import {
   FlatList,
   Text,
   Image,
-  TouchableOpacity,
   TextInput,
   StyleSheet,
+  Pressable,
 } from "react-native";
 
 const ProductList = () => {
@@ -41,6 +42,10 @@ const ProductList = () => {
 
   // const handleSorting = () => {};
 
+  const handleAddToCart = async (item: Product) => {
+    await addItemToCart(item);
+  };
+
   useEffect(() => {
     if (searchQuery) {
       const filtered = products.filter((product) =>
@@ -56,7 +61,7 @@ const ProductList = () => {
     <View style={styles.productContainer}>
       <Link href={`/product/${item._id}`}>
         <View style={styles.imageContainer}>
-        <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+          <Image source={{ uri: item.images[0] }} style={styles.productImage} />
         </View>
       </Link>
       <View style={styles.productDetails}>
@@ -65,9 +70,12 @@ const ProductList = () => {
         </Link>
         <Text style={styles.productPrice}>₹{item.price}</Text>
       </View>
-      <TouchableOpacity style={styles.addToCartButton}>
+      <Pressable
+        style={styles.addToCartButton}
+        onPress={() => handleAddToCart(item)}
+      >
         <Text style={styles.addToCartButtonText}>Add to Cart</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 
@@ -94,11 +102,7 @@ const ProductList = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => (
           <View style={styles.loading}>
-            {reachedEnd ? (
-              <></>
-            ) : (
-              <Text>Loading...</Text>
-            )}
+            {reachedEnd ? <></> : <Text>Loading...</Text>}
           </View>
         )}
       />
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
+    width: 150,
     fontWeight: "bold",
     marginBottom: 5,
   },

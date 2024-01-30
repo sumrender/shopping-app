@@ -9,19 +9,16 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "@/hooks/use-auth";
-import { Link, router } from "expo-router";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import Separator from "@/components/Separator";
-import Checkbox from "expo-checkbox";
 import { Colors } from "@/constants/Colors";
 import { CartItem } from "@/models/product.interface";
 import { clearCart, getCartItems } from "@/actions/cart-actions";
-import CartComponent from "@/components/Cart";
 import { createOrder, razorpayFn, verifyOrder } from "@/actions/order-actions";
 import { PaymentModeEnum } from "@/constants/enums";
 import * as Location from "expo-location";
 import * as geolib from "geolib";
 import { RADIUS_IN_METRES, SHOP_LOCATION } from "@/constants/data";
+import CheckoutComponent from "@/components/Checkout";
+import { router } from "expo-router";
 
 const CheckoutScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -35,16 +32,6 @@ const CheckoutScreen = () => {
     router.replace("/auth/login");
   }
   const [cart, setCart] = useState<CartItem[]>([]);
-  let name = user?.firstName && user.firstName;
-  if (name && user?.lastName) {
-    name += " " + user.lastName;
-  }
-
-  let address;
-  const { street, city, state, zipCode } = user!;
-  if (street && city && state && zipCode) {
-    address = `${street}, ${city}, ${state}, ${zipCode}`;
-  }
 
   // fetches cart items
   useEffect(() => {
@@ -64,6 +51,7 @@ const CheckoutScreen = () => {
   useEffect(() => {
     const getPermissions = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("location access status: ", status);
       if (status !== Location.PermissionStatus.GRANTED) {
         console.log("Please grant location permissions");
         Alert.alert("Please grant location permissions");
@@ -71,6 +59,7 @@ const CheckoutScreen = () => {
       }
 
       let currentLocation = await Location.getCurrentPositionAsync({});
+      console.log("currentLocation: ", currentLocation);
 
       const distanceMeters = geolib.getDistance(SHOP_LOCATION, {
         latitude: currentLocation.coords.latitude,
@@ -95,20 +84,21 @@ const CheckoutScreen = () => {
   async function placeOrder() {
     setLoading(true);
     try {
-      if (!locationNearShop) {
-        console.log(
-          `Sorry, Currently only accepting orders upto ${
-            RADIUS_IN_METRES / 1000
-          } kms only`
-        );
-        Alert.alert(
-          `Sorry, Currently only accepting orders upto ${
-            RADIUS_IN_METRES / 1000
-          } kms only`
-        );
-        setLoading(false);
-        return;
-      }
+      // if (!locationNearShop) {
+      //   console.log(
+      //     `Sorry, Currently only accepting orders upto ${
+      //       RADIUS_IN_METRES / 1000
+      //     } kms only`
+      //   );
+      //   Alert.alert(
+      //     `Sorry, Currently only accepting orders upto ${
+      //       RADIUS_IN_METRES / 1000
+      //     } kms only`
+      //   );
+      //   setLoading(false);
+      //   return;
+      // }
+      // console.log(`Yess, you live `);
       if (isPaymentOnline) {
         const newOrder = await createOrder({
           accessToken: accessToken!,
@@ -152,88 +142,46 @@ const CheckoutScreen = () => {
     }
   }
 
+  function PlaceOrderBtn() {
+    return (
+      <>
+        <View style={styles.bottomSection}>
+          <Pressable
+            style={styles.placeOrderButton}
+            onPress={placeOrder}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.WHITE} />
+            ) : (
+              <Text style={styles.placeOrderButtonText}>Place Order</Text>
+            )}
+          </Pressable>
+        </View>
+      </>
+    );
+  }
+
   return (
     <>
-      <View style={styles.container}>
-        {user ? (
+      {user ? (
+        <View style={styles.container}>
           <View style={styles.content}>
-            {/* Contact Information */}
-            <View style={styles.section}>
-              <View style={styles.headerContainer}>
-                <View style={styles.header}>
-                  <Ionicons name="mail-open-outline" size={24} color="black" />
-                  <Text style={styles.headerText}>Contact Information</Text>
-                </View>
-                <Link href={"/edit-details"}>
-                  <Text style={styles.changeText}>Change</Text>
-                </Link>
-              </View>
-              <Separator />
-              <Text style={styles.infoText}>
-                {name
-                  ? `Name: ${name}`
-                  : "Name not entered!! Complete user details"}
-              </Text>
-              <Text style={styles.infoText}>Mobile number: +1234567890</Text>
-              <Text style={styles.infoText}>
-                {address
-                  ? `Address: ${address}`
-                  : "Complete address details!!!"}
-              </Text>
-            </View>
-            {/* Payment method */}
-            <View style={styles.section}>
-              <View style={styles.header}>
-                <FontAwesome5 name="credit-card" size={24} color="black" />
-                <Text style={styles.headerText}>Payment method</Text>
-              </View>
-              <Separator />
-              <View style={styles.paymentOption}>
-                <View style={styles.checkboxContainer}>
-                  <Checkbox
-                    value={isPaymentOnline}
-                    onValueChange={() => {
-                      setIsPaymentOnline(true);
-                    }}
-                  />
-                  <Text style={styles.checkboxText}>Pay Online</Text>
-                </View>
-                <View style={styles.checkboxContainer}>
-                  <Checkbox
-                    value={!isPaymentOnline}
-                    onValueChange={() => {
-                      setIsPaymentOnline(false);
-                    }}
-                  />
-                  <Text style={styles.checkboxText}>Cash on delivery</Text>
-                </View>
-              </View>
-            </View>
-            {/* Cart products */}
-            <CartComponent
+            <CheckoutComponent
+              user={user}
               cart={cart}
               setCart={setCart}
               totalMRP={totalMRP}
               setTotalMRP={setTotalMRP}
               finalPrice={finalPrice}
               setFinalPrice={setFinalPrice}
+              isPaymentOnline={isPaymentOnline}
+              setIsPaymentOnline={setIsPaymentOnline}
             />
           </View>
-        ) : null}
-      </View>
-      <View style={styles.bottomSection}>
-        <Pressable
-          style={styles.placeOrderButton}
-          onPress={placeOrder}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={Colors.WHITE} />
-          ) : (
-            <Text style={styles.placeOrderButtonText}>Place Order</Text>
-          )}
-        </Pressable>
-      </View>
+          <PlaceOrderBtn />
+        </View>
+      ) : null}
     </>
   );
 };
@@ -247,33 +195,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  section: {
-    marginBottom: 20,
-  },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  changeText: {
-    textDecorationLine: "underline",
-    color: "blue",
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  infoText: {
-    fontSize: 16,
-    marginTop: 5,
-  },
-  paymentOption: {
-    marginLeft: 30,
-  },
+
   bottomSection: {
     borderTopWidth: 1,
     borderTopColor: "#ddd",
@@ -295,16 +217,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  checkboxText: {
-    marginLeft: 10,
-    fontSize: 15,
-    fontWeight: "500",
   },
 });
 

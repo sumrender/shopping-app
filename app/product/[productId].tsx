@@ -20,11 +20,16 @@ import { addItemToFav } from "@/actions/fav-actions";
 const ProductScreen = () => {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);
+  const [images, setImages] = useState<{ url: string }[]>([]);
 
   useEffect(() => {
     async function fetchProduct() {
       const data = await getProductById(productId);
       setProduct(data);
+      let imageArr = data.images.map((url) => {
+        return { url };
+      });
+      setImages(imageArr);
     }
     fetchProduct();
   }, []);

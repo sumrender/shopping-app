@@ -38,7 +38,7 @@ export async function register(mobileNumber: string) {
     );
     return res.status;
   } catch (error) {
-    console.log("send otp failed with error: ", error);
+    console.log("register error: ", error);
 
     if (axios.isAxiosError(error) && error.response) {
       return error.response.status;
@@ -53,9 +53,14 @@ export async function login(mobileNumber: string) {
       `${USER_URL}/login`,
       { mobileNumber }
     );
-    return res.data.success;
+    return res.status;
   } catch (error) {
-    console.log("send otp failed with error: ", error);
+    console.log("login error:  ", error);
+
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.status;
+    }
+    return 500;
   }
 }
 

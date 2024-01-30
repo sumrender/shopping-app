@@ -5,12 +5,15 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
   ToastAndroid,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { updateUserDetails } from "@/actions/user-actions";
 import { useAuth } from "@/hooks/use-auth";
 import { router } from "expo-router";
+import { ScrollView } from "react-native-gesture-handler";
 
 const UserProfileForm = () => {
   const { user, accessToken, setUser } = useAuth();
@@ -49,58 +52,77 @@ const UserProfileForm = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>
-        First Name<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput
-        style={styles.input}
-        value={firstName}
-        onChangeText={setFirstName}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -350}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.label}>
+            First Name<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
+          />
 
-      <Text style={styles.label}>
-        Last Name<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput
-        style={styles.input}
-        value={lastName}
-        onChangeText={setLastName}
-      />
+          <Text style={styles.label}>
+            Last Name<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
+          />
 
-      <Text style={styles.label}>
-        Street<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput style={styles.input} value={street} onChangeText={setStreet} />
+          <Text style={styles.label}>
+            Street<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={street}
+            onChangeText={setStreet}
+          />
 
-      <Text style={styles.label}>
-        City<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput style={styles.input} value={city} onChangeText={setCity} />
+          <Text style={styles.label}>
+            City<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput style={styles.input} value={city} onChangeText={setCity} />
 
-      <Text style={styles.label}>
-        State<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput style={styles.input} value={state} onChangeText={setState} />
+          <Text style={styles.label}>
+            State<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={state}
+            onChangeText={setState}
+          />
 
-      <Text style={styles.label}>
-        Zip Code<Text style={styles.compulsory}>*</Text>
-      </Text>
-      <TextInput
-        style={styles.input}
-        value={zipCode}
-        onChangeText={setZipCode}
-        keyboardType="numeric"
-      />
+          <Text style={styles.label}>
+            Zip Code<Text style={styles.compulsory}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={zipCode}
+            onChangeText={setZipCode}
+            keyboardType="numeric"
+          />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     padding: 20,

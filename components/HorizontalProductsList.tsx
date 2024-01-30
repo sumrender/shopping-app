@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
+    width: 150,
     fontWeight: "bold",
     color: "#333333",
   },

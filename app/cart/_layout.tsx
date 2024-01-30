@@ -48,10 +48,12 @@ const CartScreen: React.FC = () => {
               setFinalPrice={setFinalPrice}
             />
           </View>
-          <View style={styles.checkoutBtnContainer}>
-            <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
-              <Text style={styles.checkoutText}>Proceed to Checkout</Text>
-            </Pressable>
+          <View style={{ backgroundColor: Colors.WHITE }}>
+            <View style={styles.checkoutBtnContainer}>
+              <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
+                <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+              </Pressable>
+            </View>
           </View>
         </>
       ) : (
@@ -109,6 +111,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   checkoutBtnContainer: {
+    backgroundColor: Colors.WHITE,
     width: "100%",
     marginVertical: 10,
     height: 40,

@@ -12,34 +12,52 @@ import { Colors } from "@/constants/Colors";
 import Separator from "@/components/Separator";
 import { CartItem } from "@/models/product.interface";
 import { DELIVERY_CHARGE } from "@/constants/data";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import {
   addItemToCart,
   removeAllQtyOfItem,
   removeItemFromCart,
 } from "@/actions/cart-actions";
+import { User } from "@/models/user.interface";
+import Checkbox from "expo-checkbox";
 
 interface CartProps {
+  user: User;
   cart: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
   totalMRP: number;
   setTotalMRP: React.Dispatch<React.SetStateAction<number>>;
   finalPrice: number;
   setFinalPrice: React.Dispatch<React.SetStateAction<number>>;
+  isPaymentOnline: boolean;
+  setIsPaymentOnline: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const CartComponent: React.FC<CartProps> = ({
+const CheckoutComponent: React.FC<CartProps> = ({
+  user,
   cart,
   setCart,
   totalMRP,
   setTotalMRP,
   finalPrice,
   setFinalPrice,
+  isPaymentOnline,
+  setIsPaymentOnline,
 }) => {
+  let name = user?.firstName && user.firstName;
+  if (name && user?.lastName) {
+    name += " " + user.lastName;
+  }
+
+  let address = "";
+  const { street, city, state, zipCode } = user!;
+  if (street && city && state && zipCode) {
+    address = `${street}, ${city}, ${state}, ${zipCode}`;
+  }
+
   useEffect(() => {
     const total = cart.reduce((total, item) => {
-      // console.log(`${item.name}: ${item.price}*${item.cartQuantity} = ${item.price*item.cartQuantity}`);
       return total + item.price * item.cartQuantity;
     }, 0);
     setTotalMRP(total);
@@ -71,44 +89,46 @@ const CartComponent: React.FC<CartProps> = ({
   }
 
   const renderItem = ({ item }: { item: CartItem }) => (
-    <View style={styles.cartProductContainer}>
-      <Link href={`/product/${item._id}`} asChild>
-        <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-      </Link>
-      <View style={styles.productDetails}>
-        <View style={styles.headerContainer}>
-          <Link href={`/product/${item._id}`} asChild>
-            <Text style={styles.productName}>{item.name}</Text>
-          </Link>
-          <TouchableOpacity
-            style={styles.deleteIconContainer}
-            onPress={() => removeAllQty(item)}
-          >
-            <FontAwesome name="trash" size={25} color={Colors.ORANGE} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.bottomRowContainer}>
-          <Text style={styles.productPrice}>
-            ₹ {item.price * item.cartQuantity}
-          </Text>
-          <View style={styles.quantityContainer}>
+    <>
+      <View style={styles.cartProductContainer}>
+        <Link href={`/product/${item._id}`} asChild>
+          <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+        </Link>
+        <View style={styles.productDetails}>
+          <View style={styles.headerContainer}>
+            <Link href={`/product/${item._id}`} asChild>
+              <Text style={styles.productName}>{item.name}</Text>
+            </Link>
             <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => decreaseQuantity(item)}
+              style={styles.deleteIconContainer}
+              onPress={() => removeAllQty(item)}
             >
-              <FontAwesome name="minus" size={20} color={Colors.ORANGE} />
+              <FontAwesome name="trash" size={25} color={Colors.ORANGE} />
             </TouchableOpacity>
-            <Text style={styles.quantityVal}>{item.cartQuantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => increaseQuantity(item)}
-            >
-              <FontAwesome name="plus" size={20} color={Colors.ORANGE} />
-            </TouchableOpacity>
+          </View>
+          <View style={styles.bottomRowContainer}>
+            <Text style={styles.productPrice}>
+              ₹ {item.price * item.cartQuantity}
+            </Text>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => decreaseQuantity(item)}
+              >
+                <FontAwesome name="minus" size={20} color={Colors.ORANGE} />
+              </TouchableOpacity>
+              <Text style={styles.quantityVal}>{item.cartQuantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => increaseQuantity(item)}
+              >
+                <FontAwesome name="plus" size={20} color={Colors.ORANGE} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </>
   );
 
   const priceComponent = () => {
@@ -138,17 +158,77 @@ const CartComponent: React.FC<CartProps> = ({
     );
   };
 
+  function Header() {
+    return (
+      <>
+        {/* Contact Information */}
+        <View style={styles.section}>
+          <View style={styles.headerContainer}>
+            <View style={styles.header}>
+              <Ionicons name="mail-open-outline" size={24} color="black" />
+              <Text style={styles.headerText}>Contact Information</Text>
+            </View>
+            <Link href={"/edit-details"}>
+              <Text style={styles.changeText}>Change</Text>
+            </Link>
+          </View>
+          <Separator />
+          <Text style={styles.infoText}>
+            <Text style={{ fontWeight: "bold" }}>Name: </Text>
+            {name ? name : "Name not entered!! Complete user details"}
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={{ fontWeight: "bold" }}>Mobile number: </Text>{" "}
+            {user!.mobileNumber}
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={{ fontWeight: "bold" }}>Address: </Text>
+            {address ? address : "Complete address details!!!"}
+          </Text>
+        </View>
+
+        {/* Payment method */}
+        <View style={styles.section}>
+          <View style={styles.header}>
+            <FontAwesome5 name="credit-card" size={24} color="black" />
+            <Text style={styles.headerText}>Payment method</Text>
+          </View>
+          <Separator />
+          <View style={styles.paymentOption}>
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                value={isPaymentOnline}
+                onValueChange={() => {
+                  setIsPaymentOnline(true);
+                }}
+              />
+              <Text style={styles.checkboxText}>Pay Online</Text>
+            </View>
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                value={!isPaymentOnline}
+                onValueChange={() => {
+                  setIsPaymentOnline(false);
+                }}
+              />
+              <Text style={styles.checkboxText}>Cash on delivery</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.titleContainer}>
+          <Text style={styles.heading}>Items added ({cart.length})</Text>
+        </View>
+      </>
+    );
+  }
+
   return (
     <>
       <View>
         <FlatList
           data={cart}
           keyExtractor={(item: CartItem) => item._id.toString()}
-          ListHeaderComponent={
-            <View style={styles.titleContainer}>
-              <Text style={styles.heading}>Items added ({cart.length})</Text>
-            </View>
-          }
+          ListHeaderComponent={<Header />}
           renderItem={renderItem}
           ListFooterComponent={priceComponent}
         />
@@ -174,7 +254,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   billColumn: {
-    marginVertical: 10,
+    marginTop: 10,
+    marginBottom: 70,
     padding: 15,
     backgroundColor: "#f9f9f9",
     borderRadius: 10,
@@ -194,14 +275,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: Colors.ORANGE,
   },
+  separator: {
+    borderWidth: 0.5,
+    borderColor: "#ddd",
+    marginVertical: 10,
+  },
   // flatlist styles:
   cartProductContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 5,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    backgroundColor: Colors.WHITE,
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     elevation: 3,
   },
@@ -257,9 +343,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.DARK_GRAY,
   },
+  // header styles
   section: {
     marginBottom: 20,
   },
+  // headerContainer: {
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  // },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -280,28 +371,6 @@ const styles = StyleSheet.create({
   paymentOption: {
     marginLeft: 30,
   },
-  bottomSection: {
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.WHITE,
-  },
-  placeOrderButton: {
-    backgroundColor: Colors.ORANGE,
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  placeOrderButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -314,4 +383,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CartComponent;
+export default CheckoutComponent;

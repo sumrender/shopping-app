@@ -1,0 +1,2 @@
+The logic for storing products in cart items is wrong. Need to update it at some point.
+Need to add multiple product images and show them on the app also.
